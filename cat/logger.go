@@ -44,7 +44,7 @@ func getWriterByTime(time time.Time) io.Writer {
 		if file == nil {
 			filename = loggerFileName(time)
 		}
-		log.Fatalf("Cannot open log file: %s, logs will be redirected to stdout", filename)
+		log.Printf("Cannot open log file: %s, logs will be redirected to stdout", filename)
 		return os.Stdout
 	} else {
 		log.Printf("Log has been redirected to the file: %s", file.Name())
