@@ -2,9 +2,8 @@ package cat
 
 import (
 	"bytes"
+	"github.com/yeabow/cat-go/message"
 	"strconv"
-
-	"github.com/Meituan-Dianping/cat-go/message"
 )
 
 const batchFlag = '@'

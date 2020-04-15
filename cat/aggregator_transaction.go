@@ -3,9 +3,8 @@ package cat
 import (
 	"bytes"
 	"fmt"
+	"github.com/yeabow/cat-go/message"
 	"time"
-
-	"github.com/Meituan-Dianping/cat-go/message"
 )
 
 type transactionData struct {
@@ -53,7 +52,7 @@ type transactionAggregator struct {
 	scheduleMixin
 	ch      chan *message.Transaction
 	dataMap map[string]*transactionData
-	ticker *time.Ticker
+	ticker  *time.Ticker
 }
 
 func (p *transactionAggregator) collectAndSend() {

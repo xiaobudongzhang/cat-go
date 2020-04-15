@@ -1,9 +1,8 @@
 package cat
 
 import (
+	"github.com/yeabow/cat-go/message"
 	"time"
-
-	"github.com/Meituan-Dianping/cat-go/message"
 )
 
 func NewTransaction(mtype, name string) message.Transactor {

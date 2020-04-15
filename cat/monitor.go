@@ -3,12 +3,11 @@ package cat
 import (
 	"bytes"
 	"encoding/xml"
+	"github.com/yeabow/cat-go/message"
 	"runtime"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
-
-	"github.com/Meituan-Dianping/cat-go/message"
 )
 
 type catMonitor struct {

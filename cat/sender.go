@@ -3,10 +3,9 @@ package cat
 import (
 	"bytes"
 	"encoding/binary"
+	"github.com/yeabow/cat-go/message"
 	"net"
 	"time"
-
-	"github.com/Meituan-Dianping/cat-go/message"
 )
 
 func createHeader() *message.Header {
@@ -113,7 +112,7 @@ func (s *catMessageSender) beforeStop() {
 
 func (s *catMessageSender) process() {
 	if s.conn == nil {
-		s.conn = <- s.chConn
+		s.conn = <-s.chConn
 		logger.Info("Received a new connection: %s", s.conn.RemoteAddr().String())
 		return
 	}
