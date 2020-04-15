@@ -28,14 +28,23 @@ func createLogger() *Logger {
 }
 
 func openLoggerFile(time time.Time) (*os.File, error) {
+	filename := loggerFileName(time)
+	return os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+}
+
+func loggerFileName(time time.Time) string {
 	year, month, day := time.Date()
 	filename := fmt.Sprintf("%s/cat_%d_%02d_%02d.log", defaultLogDir, year, month, day)
-	return os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	return filename
 }
 
 func getWriterByTime(time time.Time) io.Writer {
 	if file, err := openLoggerFile(time); err != nil {
-		log.Fatalf("Cannot open log file: %s, logs will be redirected to stdout", file.Name())
+		var filename string
+		if file == nil {
+			filename = loggerFileName(time)
+		}
+		log.Fatalf("Cannot open log file: %s, logs will be redirected to stdout", filename)
 		return os.Stdout
 	} else {
 		log.Printf("Log has been redirected to the file: %s", file.Name())
