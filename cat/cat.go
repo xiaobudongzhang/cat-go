@@ -8,7 +8,11 @@ import (
 var isEnabled uint32 = 0
 
 func Init(domain string) {
-	if err := config.Init(domain); err != nil {
+	InitWithLocation(domain, "")
+}
+
+func InitWithLocation(domain, location string) {
+	if err := config.Init(domain, location); err != nil {
 		logger.Warning("Cat initialize failed.")
 		return
 	}

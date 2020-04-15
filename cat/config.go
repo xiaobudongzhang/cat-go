@@ -8,18 +8,19 @@ import (
 )
 
 type Config struct {
-	domain   string
-	hostname string
-	env      string
-	ip       string
-	ipHex    string
-
+	domain        string
+	hostname      string
+	env           string
+	ip            string
+	ipHex         string
+	baseLogDir    string
 	serverAddress []serverAddress
 }
 
 type XMLConfig struct {
-	Name    xml.Name         `xml:"config"`
-	Servers XMLConfigServers `xml:"servers"`
+	Name       xml.Name         `xml:"config"`
+	BaseLogDir string           `xml:"base-log-dir"`
+	Servers    XMLConfigServers `xml:"servers"`
 }
 
 type XMLConfigServers struct {
@@ -33,12 +34,12 @@ type XMLConfigServer struct {
 }
 
 var config = Config{
-	domain:   defaultAppKey,
-	hostname: defaultHostname,
-	env:      defaultEnv,
-	ip:       defaultIp,
-	ipHex:    defaultIpHex,
-
+	domain:        defaultAppKey,
+	hostname:      defaultHostname,
+	env:           defaultEnv,
+	ip:            defaultIp,
+	ipHex:         defaultIpHex,
+	baseLogDir:    defaultLogDir,
 	serverAddress: []serverAddress{},
 }
 
@@ -61,8 +62,11 @@ func loadConfigFromLocalFile(filename string) (data []byte, err error) {
 	return
 }
 
-func loadConfig() (data []byte, err error) {
-	if data, err = loadConfigFromLocalFile(defaultXmlFile); err != nil {
+func loadConfig(location string) (data []byte, err error) {
+	if len(location) == 0 {
+		location = defaultXmlFile
+	}
+	if data, err = loadConfigFromLocalFile(location); err != nil {
 		logger.Error("Failed to load local config file.")
 		return
 	}
@@ -74,6 +78,10 @@ func parseXMLConfig(data []byte) (err error) {
 	err = xml.Unmarshal(data, &c)
 	if err != nil {
 		logger.Warning("Failed to parse xml content")
+	}
+
+	if len(c.BaseLogDir) > 0 {
+		config.baseLogDir = c.BaseLogDir
 	}
 
 	for _, x := range c.Servers.Servers {
@@ -88,7 +96,7 @@ func parseXMLConfig(data []byte) (err error) {
 	return
 }
 
-func (config *Config) Init(domain string) (err error) {
+func (config *Config) Init(domain, location string) (err error) {
 	config.domain = domain
 
 	defer func() {
@@ -120,7 +128,7 @@ func (config *Config) Init(domain string) (err error) {
 	}
 
 	var data []byte
-	if data, err = loadConfig(); err != nil {
+	if data, err = loadConfig(location); err != nil {
 		return
 	}
 
