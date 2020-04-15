@@ -29,14 +29,14 @@ type catRouterConfig struct {
 	sample  float64
 	routers []serverAddress
 	current *serverAddress
-	ticker *time.Ticker
+	ticker  *time.Ticker
 }
 
 var router = catRouterConfig{
 	scheduleMixin: makeScheduleMixedIn(signalRouterExit),
 	sample:        1.0,
 	routers:       make([]serverAddress, 0),
-	ticker: nil,
+	ticker:        nil,
 }
 
 func (c *catRouterConfig) GetName() string {
@@ -61,8 +61,8 @@ func (c *catRouterConfig) updateRouterConfig() {
 		Timeout: 5 * time.Second,
 	}
 
-	for _, server := range config.httpServerAddresses {
-		u.Host = fmt.Sprintf("%s:%d", server.host, config.httpServerPort)
+	for _, server := range config.serverAddress {
+		u.Host = fmt.Sprintf("%s:%d", server.host, server.httpPort)
 		logger.Info("Getting router config from %s", u.String())
 
 		resp, err := client.Get(u.String())
@@ -112,7 +112,7 @@ func (c *catRouterConfig) updateSample(v string) {
 	sample, err := strconv.ParseFloat(v, 32)
 	if err != nil {
 		logger.Warning("Sample should be a valid float, %s given", v)
-	} else if math.Abs(sample - c.sample) > 1e-9 {
+	} else if math.Abs(sample-c.sample) > 1e-9 {
 		c.sample = sample
 		logger.Info("Sample rate has been set to %f%%", c.sample*100)
 	}
@@ -121,7 +121,7 @@ func (c *catRouterConfig) updateSample(v string) {
 func (c *catRouterConfig) updateBlock(v string) {
 	if v == "false" {
 		enable()
-	} else  {
+	} else {
 		disable()
 	}
 }

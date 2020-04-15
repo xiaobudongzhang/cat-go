@@ -14,9 +14,6 @@ type Config struct {
 	ip       string
 	ipHex    string
 
-	httpServerPort      int
-	httpServerAddresses []serverAddress
-
 	serverAddress []serverAddress
 }
 
@@ -30,8 +27,9 @@ type XMLConfigServers struct {
 }
 
 type XMLConfigServer struct {
-	Host string `xml:"ip,attr"`
-	Port int    `xml:"port,attr"`
+	Host     string `xml:"ip,attr"`
+	Port     int    `xml:"port,attr"`
+	HttpPort int    `xml:"http-port,attr"`
 }
 
 var config = Config{
@@ -40,9 +38,6 @@ var config = Config{
 	env:      defaultEnv,
 	ip:       defaultIp,
 	ipHex:    defaultIpHex,
-
-	httpServerPort:      8080,
-	httpServerAddresses: []serverAddress{},
 
 	serverAddress: []serverAddress{},
 }
@@ -82,13 +77,14 @@ func parseXMLConfig(data []byte) (err error) {
 	}
 
 	for _, x := range c.Servers.Servers {
-		config.httpServerAddresses = append(config.httpServerAddresses, serverAddress{
-			host: x.Host,
-			port: x.Port,
+		config.serverAddress = append(config.serverAddress, serverAddress{
+			host:     x.Host,
+			port:     x.Port,
+			httpPort: x.HttpPort,
 		})
 	}
 
-	logger.Info("Server addresses: %s", config.httpServerAddresses)
+	logger.Info("Server addresses: %s", config.serverAddress)
 	return
 }
 

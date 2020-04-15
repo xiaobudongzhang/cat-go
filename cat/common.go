@@ -6,8 +6,9 @@ import (
 )
 
 type serverAddress struct {
-	host string
-	port int
+	host     string
+	port     int
+	httpPort int
 }
 
 func resolveServerAddresses(router string) (addresses []serverAddress) {
