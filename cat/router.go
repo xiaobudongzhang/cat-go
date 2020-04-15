@@ -1,6 +1,7 @@
 package cat
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -22,6 +23,10 @@ type routerConfigXMLProperty struct {
 type routerConfigXML struct {
 	XMLName    xml.Name                  `xml:"property-config"`
 	Properties []routerConfigXMLProperty `xml:"property"`
+}
+
+type routerConfigJson struct {
+	Kvs map[string]string `json:"kvs"`
 }
 
 type catRouterConfig struct {
@@ -49,7 +54,7 @@ func (c *catRouterConfig) updateRouterConfig() {
 	query.Add("domain", config.domain)
 	query.Add("ip", config.ip)
 	query.Add("hostname", config.hostname)
-	query.Add("op", "xml")
+	query.Add("op", "json")
 
 	u := url.URL{
 		Scheme:   "http",
@@ -132,19 +137,19 @@ func (c *catRouterConfig) parse(reader io.ReadCloser) {
 		return
 	}
 
-	t := new(routerConfigXML)
-	if err := xml.Unmarshal(bytes, &t); err != nil {
-		logger.Warning("Error occurred while parsing router config xml content.\n%s", string(bytes))
+	t := new(routerConfigJson)
+	if err := json.Unmarshal(bytes, &t); err != nil {
+		logger.Warning("Error occurred while parsing router config json content.\n%s", string(bytes))
 	}
 
-	for _, property := range t.Properties {
-		switch property.Id {
+	for k, v := range t.Kvs {
+		switch k {
 		case propertySample:
-			c.updateSample(property.Value)
+			c.updateSample(v)
 		case propertyRouters:
-			c.updateRouters(property.Value)
+			c.updateRouters(v)
 		case propertyBlock:
-			c.updateBlock(property.Value)
+			c.updateBlock(v)
 		}
 	}
 }
