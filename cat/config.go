@@ -82,6 +82,7 @@ func parseXMLConfig(data []byte) (err error) {
 
 	if len(c.BaseLogDir) > 0 {
 		config.baseLogDir = c.BaseLogDir
+		logger.changeLogFile()
 	}
 
 	for _, x := range c.Servers.Servers {

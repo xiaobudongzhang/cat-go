@@ -34,7 +34,7 @@ func openLoggerFile(time time.Time) (*os.File, error) {
 
 func loggerFileName(time time.Time) string {
 	year, month, day := time.Date()
-	filename := fmt.Sprintf("%s/cat_%d_%02d_%02d.log", defaultLogDir, year, month, day)
+	filename := fmt.Sprintf("%s/cat_%d_%02d_%02d.log", config.baseLogDir, year, month, day)
 	return filename
 }
 
@@ -60,6 +60,13 @@ func (l *Logger) switchLogFile(time time.Time) {
 		return
 	}
 	l.logger.SetOutput(getWriterByTime(time))
+}
+
+func (l *Logger) changeLogFile() {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	l.logger.SetOutput(getWriterByTime(time.Now()))
 }
 
 func (l *Logger) write(prefix, format string, args ...interface{}) {
