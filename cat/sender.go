@@ -137,7 +137,7 @@ var sender = catMessageSender{
 	normal:        make(chan message.Messager, normalPriorityQueueSize),
 	high:          make(chan message.Messager, highPriorityQueueSize),
 	chConn:        make(chan net.Conn),
-	encoder:       message.NewBinaryEncoder(),
+	encoder:       message.NewReadableEncoder(),
 	buf:           bytes.NewBuffer([]byte{}),
 	conn:          nil,
 }
