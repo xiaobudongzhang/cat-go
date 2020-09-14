@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -82,8 +84,25 @@ func parseXMLConfig(data []byte) (err error) {
 
 	if len(c.BaseLogDir) > 0 {
 		config.baseLogDir = c.BaseLogDir
-		logger.changeLogFile()
+	} else {
+		config.baseLogDir = "/data/applogs/cat"
 	}
+	_, err = os.Stat(config.baseLogDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			//创建失败
+			if err = os.Mkdir(config.baseLogDir, os.ModePerm); err != nil {
+				//置为空
+				dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+				if err == nil {
+					config.baseLogDir = strings.Replace(dir, "\\", "/", -1)
+				}
+
+			}
+		}
+	}
+
+	logger.changeLogFile()
 
 	for _, x := range c.Servers.Servers {
 		config.serverAddress = append(config.serverAddress, serverAddress{
@@ -98,6 +117,7 @@ func parseXMLConfig(data []byte) (err error) {
 }
 
 func (config *Config) Init(domain, location string) (err error) {
+
 	config.domain = domain
 
 	defer func() {
@@ -108,7 +128,14 @@ func (config *Config) Init(domain, location string) (err error) {
 		}
 	}()
 
-	// TODO load env.
+	//默认空，取ENV，其次使用/data/appdatas/cat目录作为默认目录
+	if location == "" {
+		location = os.Getenv("CAT_HOME")
+		if location == "" {
+			location = "/data/appdatas/cat"
+		}
+		location += "/client.xml"
+	}
 
 	var ip net.IP
 	if ip, err = getLocalhostIp(); err != nil {

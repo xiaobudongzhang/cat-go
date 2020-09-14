@@ -34,7 +34,7 @@ func openLoggerFile(time time.Time) (*os.File, error) {
 
 func loggerFileName(time time.Time) string {
 	year, month, day := time.Date()
-	filename := fmt.Sprintf("%s/cat_%d_%02d_%02d.log", config.baseLogDir, year, month, day)
+	filename := fmt.Sprintf("%s/go_cat_%d%02d%02d.log", config.baseLogDir, year, month, day)
 	return filename
 }
 
