@@ -82,6 +82,14 @@ func parseXMLConfig(data []byte) (err error) {
 		logger.Warning("Failed to parse xml content")
 	}
 
+	if err = loadXmlConfig(c); err != nil {
+		return
+	}
+
+	return
+}
+
+func loadXmlConfig(c XMLConfig) (err error) {
 	if len(c.BaseLogDir) > 0 {
 		config.baseLogDir = c.BaseLogDir
 	} else {
@@ -113,6 +121,52 @@ func parseXMLConfig(data []byte) (err error) {
 	}
 
 	logger.Info("Server addresses: %s", config.serverAddress)
+
+	return err
+}
+
+func (config *Config) InitWithConfig(domain string, cfg XMLConfig) (err error) {
+
+	config.domain = domain
+
+	defer func() {
+		if err == nil {
+			logger.Info("Cat has been initialized successfully with appkey: %s", config.domain)
+		} else {
+			logger.Error("Failed to initialize cat.")
+		}
+	}()
+
+	var ip net.IP
+	if ip, err = getLocalhostIp(); err != nil {
+		config.ip = defaultIp
+		config.ipHex = defaultIpHex
+		logger.Warning("Error while getting local ip, using default ip: %s", defaultIp)
+	} else {
+		config.ip = ip2String(ip)
+		config.ipHex = ip2HexString(ip)
+		logger.Info("Local ip has been configured to %s", config.ip)
+	}
+
+	if config.hostname, err = os.Hostname(); err != nil {
+		config.hostname = defaultHostname
+		logger.Warning("Error while getting hostname, using default hostname: %s", defaultHostname)
+	} else {
+		logger.Info("Hostname has been configured to %s", config.hostname)
+	}
+
+	// Print config content to log file.
+	data, err := xml.Marshal(cfg)
+	if err != nil {
+		return
+	}
+
+	logger.Info("\n%s", string(data))
+
+	if err = loadXmlConfig(cfg); err != nil {
+		return
+	}
+
 	return
 }
 

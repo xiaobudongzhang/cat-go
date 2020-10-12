@@ -24,6 +24,19 @@ func InitWithLocation(domain, location string) {
 	aggregator.Background()
 }
 
+func InitWithConfig(domain string, cfg XMLConfig) {
+	if err := config.InitWithConfig(domain, cfg); err != nil {
+		logger.Warning("Cat initialize failed.")
+		return
+	}
+	enable()
+
+	go background(&router)
+	go background(&monitor)
+	go background(&sender)
+	aggregator.Background()
+}
+
 func enable() {
 	if atomic.SwapUint32(&isEnabled, 1) == 0 {
 		logger.Info("Cat has been enabled.")
