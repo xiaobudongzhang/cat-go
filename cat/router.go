@@ -3,6 +3,7 @@ package cat
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -67,7 +68,7 @@ func (c *catRouterConfig) updateRouterConfig() {
 	}
 
 	for _, server := range config.serverAddress {
-		u.Host = fmt.Sprintf("%s:%d", server.host, server.httpPort)
+		u.Host = fmt.Sprintf("%s:%d", server.Host, server.HttpPort)
 		logger.Info("Getting router config from %s", u.String())
 
 		resp, err := client.Get(u.String())
@@ -76,8 +77,12 @@ func (c *catRouterConfig) updateRouterConfig() {
 			continue
 		}
 
-		c.parse(resp.Body)
-		return
+		err = c.parse(resp.Body)
+		if err == nil {
+			return
+		} else {
+			continue
+		}
 	}
 
 	logger.Error("Can't get router config from remote server.")
@@ -113,14 +118,16 @@ func (c *catRouterConfig) process() {
 	}
 }
 
-func (c *catRouterConfig) updateSample(v string) {
+func (c *catRouterConfig) updateSample(v string) error {
 	sample, err := strconv.ParseFloat(v, 32)
 	if err != nil {
 		logger.Warning("Sample should be a valid float, %s given", v)
+		return err
 	} else if math.Abs(sample-c.sample) > 1e-9 {
 		c.sample = sample
 		logger.Info("Sample rate has been set to %f%%", c.sample*100)
 	}
+	return nil
 }
 
 func (c *catRouterConfig) updateBlock(v string) {
@@ -131,10 +138,10 @@ func (c *catRouterConfig) updateBlock(v string) {
 	}
 }
 
-func (c *catRouterConfig) parse(reader io.ReadCloser) {
+func (c *catRouterConfig) parse(reader io.ReadCloser) error {
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return
+		return err
 	}
 
 	t := new(routerConfigJson)
@@ -145,22 +152,29 @@ func (c *catRouterConfig) parse(reader io.ReadCloser) {
 	for k, v := range t.Kvs {
 		switch k {
 		case propertySample:
-			c.updateSample(v)
+			err = c.updateSample(v)
+			if err != nil {
+				return err
+			}
 		case propertyRouters:
-			c.updateRouters(v)
+			err = c.updateRouters(v)
+			if err != nil {
+				return err
+			}
 		case propertyBlock:
 			c.updateBlock(v)
 		}
 	}
+	return nil
 }
 
-func (c *catRouterConfig) updateRouters(router string) {
+func (c *catRouterConfig) updateRouters(router string) error {
 	newRouters := resolveServerAddresses(router)
 
 	oldLen, newLen := len(c.routers), len(newRouters)
 
 	if newLen == 0 {
-		return
+		return errors.New("Routers not found")
 	} else if oldLen == 0 {
 		logger.Info("Routers has been initialized to: %s", newRouters)
 		c.routers = newRouters
@@ -179,19 +193,21 @@ func (c *catRouterConfig) updateRouters(router string) {
 
 	for _, server := range newRouters {
 		if compareServerAddress(c.current, &server) {
-			return
+			return nil
 		}
 
-		addr := fmt.Sprintf("%s:%d", server.host, server.port)
+		addr := fmt.Sprintf("%s:%d", server.Host, server.Port)
 		if conn, err := net.DialTimeout("tcp", addr, time.Second); err != nil {
 			logger.Info("Failed to connect to %s, retrying...", addr)
+			return errors.New("Failed to connect to " + addr)
 		} else {
 			c.current = &server
 			logger.Info("Connected to %s.", addr)
 			sender.chConn <- conn
-			return
+			return nil
 		}
 	}
 
 	logger.Info("Cannot established a connection to cat server.")
+	return nil
 }

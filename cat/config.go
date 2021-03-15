@@ -1,6 +1,7 @@
 package cat
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"io/ioutil"
 	"net"
@@ -114,13 +115,15 @@ func loadXmlConfig(c XMLConfig) (err error) {
 
 	for _, x := range c.Servers.Servers {
 		config.serverAddress = append(config.serverAddress, serverAddress{
-			host:     x.Host,
-			port:     x.Port,
-			httpPort: x.HttpPort,
+			Host:     x.Host,
+			Port:     x.Port,
+			HttpPort: x.HttpPort,
 		})
 	}
 
-	logger.Info("Server addresses: %s", config.serverAddress)
+	json, _ := json.Marshal(config.serverAddress)
+
+	logger.Info("Server addresses: %s", string(json))
 
 	return err
 }

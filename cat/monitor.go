@@ -92,7 +92,7 @@ func (m *catMonitor) buildXml() *bytes.Buffer {
 
 	buf := bytes.NewBuffer([]byte{})
 	encoder := xml.NewEncoder(buf)
-	encoder.Indent("", "\t")
+	//encoder.Indent("", "\t")
 
 	if err := encoder.Encode(status); err != nil {
 		buf.Reset()
@@ -106,7 +106,7 @@ func (m *catMonitor) collectAndSend() {
 	var trans = message.NewTransaction(typeSystem, "Status", manager.flush)
 	defer trans.Complete()
 
-	trans.LogEvent("Cat_golang_Client_Version", GoCatVersion)
+	//trans.LogEvent("Cat_golang_Client_Version", GoCatVersion)
 
 	// NOTE type & name is useless while sending a heartbeat
 	heartbeat := message.NewHeartbeat("Heartbeat", config.ip, nil)

@@ -89,6 +89,14 @@ func (s *catMessageSender) handleTransaction(trans *message.Transaction) {
 	}
 }
 
+func (s *catMessageSender) handleHeartbeat(heartbeat *message.Heartbeat) {
+	select {
+	case s.normal <- heartbeat:
+	default:
+		// logger.Warning("Normal priority channel is full, event has been discarded.")
+	}
+}
+
 func (s *catMessageSender) handleEvent(event *message.Event) {
 	select {
 	case s.normal <- event:

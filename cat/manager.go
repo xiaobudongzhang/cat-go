@@ -32,6 +32,8 @@ func (p *catMessageManager) flush(m message.Messager) {
 		} else {
 			aggregator.transaction.Put(m)
 		}
+	case *message.Heartbeat:
+		sender.handleHeartbeat(m)
 	case *message.Event:
 		if m.Status != SUCCESS {
 			sender.handleEvent(m)

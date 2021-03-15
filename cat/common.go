@@ -6,9 +6,9 @@ import (
 )
 
 type serverAddress struct {
-	host     string
-	port     int
-	httpPort int
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	HttpPort int    `json:"http_port"`
 }
 
 func resolveServerAddresses(router string) (addresses []serverAddress) {
@@ -26,8 +26,8 @@ func resolveServerAddresses(router string) (addresses []serverAddress) {
 			logger.Warning("%s isn't a valid server address.", segment)
 		} else {
 			addresses = append(addresses, serverAddress{
-				host: fragments[0],
-				port: port,
+				Host: fragments[0],
+				Port: port,
 			})
 		}
 	}
@@ -38,8 +38,8 @@ func compareServerAddress(a, b *serverAddress) bool {
 	if a == nil || b == nil {
 		return false
 	}
-	if strings.Compare(a.host, b.host) == 0 {
-		return a.port == b.port
+	if strings.Compare(a.Host, b.Host) == 0 {
+		return a.Port == b.Port
 	} else {
 		return false
 	}
