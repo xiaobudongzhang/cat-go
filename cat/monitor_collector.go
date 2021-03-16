@@ -2,6 +2,7 @@ package cat
 
 import (
 	"fmt"
+	"github.com/shirou/gopsutil/mem"
 	"runtime"
 	"strconv"
 
@@ -13,6 +14,7 @@ type Collector interface {
 	GetId() string
 	GetDesc() string
 	GetProperties() map[string]string
+	Fetch(os *OSInfo) error
 }
 
 func b2kbstr(b uint64) string {
@@ -157,4 +159,68 @@ func (c *cpuInfoCollector) GetProperties() map[string]string {
 	// }
 
 	return m
+}
+
+type systemCollector struct {
+	vm    *mem.VirtualMemoryStat
+	sm    *mem.SwapMemoryStat
+	props map[string]string
+}
+
+func (c *systemCollector) GetId() string {
+	return "System"
+}
+
+func (c *systemCollector) GetDesc() string {
+	return "System"
+}
+
+func (c *systemCollector) GetProperties() map[string]string {
+	m := make(map[string]string)
+
+	if avg, err := load.Avg(); err == nil {
+		m["LoadAverage"] = f642str(avg.Load1)
+	} else {
+		m["LoadAverage"] = "-1.0"
+	}
+
+	if mem, err := mem.VirtualMemory(); err == nil {
+		m["FreePhysicalMemory"] = fmt.Sprintf("%d", mem.Free)
+		c.vm = mem
+	} else {
+		m["FreePhysicalMemory"] = "0"
+	}
+	if mem, err := mem.SwapMemory(); err == nil {
+		m["FreeSwapSpaceSize"] = fmt.Sprintf("%d", mem.Free)
+		c.sm = mem
+	} else {
+		m["FreeSwapSpaceSize"] = "0"
+	}
+
+	c.props = m
+
+	return m
+}
+
+func (c *systemCollector) Fetch(info *OSInfo) error {
+
+	//系统负载
+	if len(c.props) > 0 {
+		info.SystemLoadAverage = c.props["LoadAverage"]
+	}
+
+	//内存信息
+	if c.vm != nil {
+		info.TotalPhysicalMemory = fmt.Sprintf("%d", c.vm.Total)
+		info.FreePhysicalMemory = fmt.Sprintf("%d", c.vm.Free)
+		info.CommittedVirtualMemory = fmt.Sprintf("%d", c.vm.CommitLimit)
+
+	}
+
+	//交换分区
+	if c.sm != nil {
+		info.TotalSwapSpace = fmt.Sprintf("%d", c.sm.Total)
+		info.FreeSwapSpace = fmt.Sprintf("%d", c.sm.Free)
+	}
+	return nil
 }
