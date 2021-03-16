@@ -2,21 +2,38 @@ package cat
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"github.com/yeabow/cat-go/message"
 	"net"
 	"time"
 )
 
-func createHeader() *message.Header {
-	return &message.Header{
-		Domain:   config.domain,
-		Hostname: config.hostname,
-		Ip:       config.ip,
+func createHeader(ctx context.Context) *message.Header {
+	var rootMessageId, parentMessageId, messageId string
+	if ctx != nil {
+		if id, exists := ctx.Value(CatContextRootMessageId).(string); exists {
+			rootMessageId = id
+		}
+		if id, exists := ctx.Value(CatContextParentMessageId).(string); exists {
+			parentMessageId = id
+		}
+		if id, exists := ctx.Value(CatContextChildMessageId).(string); exists {
+			messageId = id
+		}
+	}
 
-		MessageId:       manager.nextId(),
-		ParentMessageId: "",
-		RootMessageId:   "",
+	if messageId == "" {
+		messageId = Manager.NextId()
+	}
+
+	return &message.Header{
+		Domain:          config.domain,
+		Hostname:        config.hostname,
+		Ip:              config.ip,
+		MessageId:       messageId,
+		ParentMessageId: parentMessageId,
+		RootMessageId:   rootMessageId,
 	}
 }
 
@@ -41,7 +58,7 @@ func (s *catMessageSender) send(m message.Messager) {
 	var buf = s.buf
 	buf.Reset()
 
-	var header = createHeader()
+	var header = createHeader(m.GetCtx())
 	if err := s.encoder.EncodeHeader(buf, header); err != nil {
 		return
 	}

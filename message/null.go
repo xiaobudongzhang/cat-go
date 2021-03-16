@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"context"
 	"time"
 )
 
@@ -31,6 +32,14 @@ func (m *NullMessage) GetStatus() string {
 
 func (m *NullMessage) GetData() *bytes.Buffer {
 	return nil
+}
+
+func (m *NullMessage) GetCtx() context.Context {
+	return nil
+}
+
+func (m *NullMessage) SetCtx(context context.Context) {
+
 }
 
 func (m *NullMessage) GetTime() time.Time {
@@ -72,4 +81,12 @@ func (t *NullTransaction) NewEvent(mtype, name string) Messager {
 
 func (t *NullTransaction) LogEvent(mtype, name string, args ...string) {
 	return
+}
+
+func (m *NullTransaction) GetCtx() context.Context {
+	return nil
+}
+
+func (m *NullTransaction) SetCtx(context context.Context) {
+
 }

@@ -1,15 +1,20 @@
 package cat
 
 import (
+	"context"
 	"github.com/yeabow/cat-go/message"
 	"time"
 )
 
 func NewTransaction(mtype, name string) message.Transactor {
+	return NewTransactionWithContext(nil, mtype, name)
+}
+
+func NewTransactionWithContext(ctx context.Context, mtype, name string) message.Transactor {
 	if !IsEnabled() {
 		return &message.NullTransaction{}
 	}
-	return message.NewTransaction(mtype, name, manager.flush)
+	return message.NewTransactionWithContext(ctx, mtype, name, Manager.flush)
 }
 
 func NewCompletedTransactionWithDuration(mtype, name string, duration time.Duration) {
@@ -30,7 +35,7 @@ func NewEvent(mtype, name string) message.Messager {
 	if !IsEnabled() {
 		return &message.NullMessage{}
 	}
-	return message.NewEvent(mtype, name, manager.flush)
+	return message.NewEvent(mtype, name, Manager.flush)
 }
 
 func LogEvent(mtype, name string, args ...string) {

@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"context"
 	"time"
 )
 
@@ -19,6 +20,8 @@ type MessageGetter interface {
 	GetStatus() string
 	GetData() *bytes.Buffer
 	GetTime() time.Time
+	GetCtx() context.Context
+	SetCtx(context context.Context)
 }
 
 type Messager interface {
@@ -31,6 +34,7 @@ type Messager interface {
 }
 
 type Message struct {
+	Ctx    context.Context
 	Type   string
 	Name   string
 	Status string
@@ -43,7 +47,12 @@ type Message struct {
 }
 
 func NewMessage(mtype, name string, flush Flush) Message {
+	return NewMessageWithContext(nil, mtype, name, flush)
+}
+
+func NewMessageWithContext(cxt context.Context, mtype, name string, flush Flush) Message {
 	return Message{
+		Ctx:       cxt,
 		Type:      mtype,
 		Name:      name,
 		Status:    CatSuccess,
@@ -61,6 +70,14 @@ func (m *Message) Complete() {
 
 func (m *Message) GetType() string {
 	return m.Type
+}
+
+func (m *Message) GetCtx() context.Context {
+	return m.Ctx
+}
+
+func (m *Message) SetCtx(context context.Context) {
+	m.Ctx = context
 }
 
 func (m *Message) GetName() string {

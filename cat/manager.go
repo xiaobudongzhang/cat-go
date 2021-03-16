@@ -64,7 +64,7 @@ func (p *catMessageManager) hitSample(sampleRate float64) bool {
 	return next == 0
 }
 
-func (p *catMessageManager) nextId() string {
+func (p *catMessageManager) NextId() string {
 	hour := int(time.Now().Unix() / 3600)
 
 	if hour != p.hour {
@@ -80,7 +80,7 @@ func (p *catMessageManager) nextId() string {
 	return fmt.Sprintf("%s-%d", p.messageIdPrefix, atomic.AddUint32(&p.index, 1))
 }
 
-var manager = catMessageManager{
+var Manager = catMessageManager{
 	index:  0,
 	offset: 0,
 	hour:   0,

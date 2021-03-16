@@ -1,5 +1,7 @@
 package message
 
+import "context"
+
 type Event struct {
 	Message
 }
@@ -9,9 +11,12 @@ func (e *Event) Complete() {
 		e.Message.flush(e)
 	}
 }
-
 func NewEvent(mtype, name string, flush Flush) *Event {
+	return NewEventWithContext(nil, mtype, name, flush)
+}
+
+func NewEventWithContext(ctx context.Context, mtype, name string, flush Flush) *Event {
 	return &Event{
-		Message: NewMessage(mtype, name, flush),
+		Message: NewMessageWithContext(ctx, mtype, name, flush),
 	}
 }

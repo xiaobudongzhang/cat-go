@@ -102,7 +102,8 @@ func loadXmlConfig(c XMLConfig) (err error) {
 			//创建失败
 			if err = os.Mkdir(config.baseLogDir, os.ModePerm); err != nil {
 				//置为空
-				dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+				var dir string
+				dir, err = filepath.Abs(filepath.Dir(os.Args[0]))
 				if err == nil {
 					config.baseLogDir = strings.Replace(dir, "\\", "/", -1)
 				}

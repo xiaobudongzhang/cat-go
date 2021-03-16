@@ -33,6 +33,13 @@ const ( // Declared properties given by the router server.
 )
 
 const (
+	CatContextRootMessageId    = "_catRootMessageId"
+	CatContextParentMessageId  = "_catParentMessageId"
+	CatContextChildMessageId   = "_catChildMessageId"
+	CatContextClientDomainName = "_catClientDomainName"
+)
+
+const (
 	highPriorityQueueSize   = 1000
 	normalPriorityQueueSize = 5000
 

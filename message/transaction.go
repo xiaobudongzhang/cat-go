@@ -1,6 +1,7 @@
 package message
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -85,8 +86,12 @@ func (t *Transaction) GetChildren() []Messager {
 }
 
 func NewTransaction(mtype, name string, flush Flush) *Transaction {
+	return NewTransactionWithContext(nil, mtype, name, flush)
+}
+
+func NewTransactionWithContext(cxt context.Context, mtype, name string, flush Flush) *Transaction {
 	return &Transaction{
-		Message:       NewMessage(mtype, name, flush),
+		Message:       NewMessageWithContext(cxt, mtype, name, flush),
 		children:      make([]Messager, 0),
 		isCompleted:   false,
 		mu:            sync.Mutex{},
