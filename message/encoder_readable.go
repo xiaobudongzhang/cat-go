@@ -2,6 +2,7 @@ package message
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 )
 
@@ -148,6 +149,11 @@ func (e *ReadableEncoder) EncodeHeader(buf *bytes.Buffer, header *Header) (err e
 }
 
 func (e *ReadableEncoder) EncodeTransaction(buf *bytes.Buffer, trans *Transaction) (err error) {
+	if trans == nil {
+		err = errors.New("trans is null")
+		return
+	}
+
 	children := trans.GetChildren()
 	if len(children) == 0 {
 		return e.encodeLine(buf, trans, 'A', POLICY_WITH_DURATION)
