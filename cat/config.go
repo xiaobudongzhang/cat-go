@@ -17,12 +17,14 @@ type Config struct {
 	ip            string
 	ipHex         string
 	baseLogDir    string
+	router        string
 	serverAddress []serverAddress
 }
 
 type XMLConfig struct {
 	Name       xml.Name         `xml:"config"`
 	Env        string           `xml:"env"`
+	Router     string           `xml:"router"`
 	BaseLogDir string           `xml:"base-log-dir"`
 	Servers    XMLConfigServers `xml:"servers"`
 }
@@ -44,6 +46,7 @@ var config = Config{
 	ip:            defaultIp,
 	ipHex:         defaultIpHex,
 	baseLogDir:    defaultLogDir,
+	router:        "",
 	serverAddress: []serverAddress{},
 }
 
@@ -117,19 +120,27 @@ func loadXmlConfig(c XMLConfig) (err error) {
 		config.env = c.Env
 	}
 
-	logger.changeLogFile()
-
-	for _, x := range c.Servers.Servers {
-		config.serverAddress = append(config.serverAddress, serverAddress{
-			Host:     x.Host,
-			Port:     x.Port,
-			HttpPort: x.HttpPort,
-		})
+	if c.Router != "" {
+		config.router = c.Router
 	}
 
-	json, _ := json.Marshal(config.serverAddress)
+	logger.changeLogFile()
 
-	logger.Info("Server addresses: %s", string(json))
+	if c.Router != "" {
+		for _, x := range c.Servers.Servers {
+			config.serverAddress = append(config.serverAddress, serverAddress{
+				Host:     x.Host,
+				Port:     x.Port,
+				HttpPort: x.HttpPort,
+			})
+		}
+
+		json, _ := json.Marshal(config.serverAddress)
+
+		logger.Info("Server addresses: %s", string(json))
+	} else {
+		logger.Info("Router: %s", c.Router)
+	}
 
 	return err
 }

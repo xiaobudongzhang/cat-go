@@ -50,38 +50,56 @@ func (c *catRouterConfig) GetName() string {
 }
 
 func (c *catRouterConfig) updateRouterConfig() {
-	var query = url.Values{}
-	query.Add("env", config.env)
-	query.Add("domain", config.domain)
-	query.Add("ip", config.ip)
-	query.Add("hostname", config.hostname)
-	query.Add("op", "json")
+	var u *url.URL
+	if config.router == "" {
+		var query = url.Values{}
+		query.Add("env", config.env)
+		query.Add("domain", config.domain)
+		query.Add("ip", config.ip)
+		query.Add("hostname", config.hostname)
+		query.Add("op", "json")
 
-	u := url.URL{
-		Scheme:   "http",
-		Path:     "/cat/s/router",
-		RawQuery: query.Encode(),
+		u = &url.URL{
+			Scheme:   "http",
+			Path:     "/cat/s/router",
+			RawQuery: query.Encode(),
+		}
+	} else {
+		u, _ = url.Parse(config.router)
 	}
 
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
 
-	for _, server := range config.serverAddress {
-		u.Host = fmt.Sprintf("%s:%d", server.Host, server.HttpPort)
-		logger.Info("Getting router config from %s", u.String())
+	if config.router == "" {
+		for _, server := range config.serverAddress {
+			u.Host = fmt.Sprintf("%s:%d", server.Host, server.HttpPort)
+			logger.Info("Getting router config from %s", u.String())
 
+			resp, err := client.Get(u.String())
+			if err != nil {
+				logger.Warning("Error occurred while getting router config from url %s", u.String())
+				continue
+			}
+
+			err = c.parse(resp.Body)
+			if err == nil {
+				return
+			} else {
+				continue
+			}
+		}
+	} else {
 		resp, err := client.Get(u.String())
 		if err != nil {
 			logger.Warning("Error occurred while getting router config from url %s", u.String())
-			continue
+			return
 		}
 
 		err = c.parse(resp.Body)
 		if err == nil {
 			return
-		} else {
-			continue
 		}
 	}
 
