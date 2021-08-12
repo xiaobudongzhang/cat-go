@@ -22,6 +22,7 @@ type Config struct {
 
 type XMLConfig struct {
 	Name       xml.Name         `xml:"config"`
+	Env        string           `xml:"env"`
 	BaseLogDir string           `xml:"base-log-dir"`
 	Servers    XMLConfigServers `xml:"servers"`
 }
@@ -110,6 +111,10 @@ func loadXmlConfig(c XMLConfig) (err error) {
 
 			}
 		}
+	}
+
+	if c.Env != "" {
+		config.env = c.Env
 	}
 
 	logger.changeLogFile()
