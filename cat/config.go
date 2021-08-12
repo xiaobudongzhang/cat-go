@@ -126,7 +126,7 @@ func loadXmlConfig(c XMLConfig) (err error) {
 
 	logger.changeLogFile()
 
-	if c.Router != "" {
+	if c.Router == "" {
 		for _, x := range c.Servers.Servers {
 			config.serverAddress = append(config.serverAddress, serverAddress{
 				Host:     x.Host,
