@@ -2,10 +2,11 @@ package main
 
 import (
 	"errors"
-	"github.com/yeabow/cat-go/cat"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/xiaobudongzhang/cat-go/cat"
 )
 
 const TestType = "foo"

@@ -2,8 +2,9 @@ package cat
 
 import (
 	"fmt"
-	"github.com/yeabow/cat-go/message"
 	"time"
+
+	"github.com/xiaobudongzhang/cat-go/message"
 )
 
 type eventData struct {

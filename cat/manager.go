@@ -2,9 +2,10 @@ package cat
 
 import (
 	"fmt"
-	"github.com/yeabow/cat-go/message"
 	"sync/atomic"
 	"time"
+
+	"github.com/xiaobudongzhang/cat-go/message"
 )
 
 type catMessageManager struct {

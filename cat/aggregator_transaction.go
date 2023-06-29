@@ -3,8 +3,9 @@ package cat
 import (
 	"bytes"
 	"fmt"
-	"github.com/yeabow/cat-go/message"
 	"time"
+
+	"github.com/xiaobudongzhang/cat-go/message"
 )
 
 type transactionData struct {
@@ -17,7 +18,7 @@ type transactionData struct {
 	durations map[int]int
 }
 
-//noinspection GoUnhandledErrorResult
+// noinspection GoUnhandledErrorResult
 func encodeTransactionData(data *transactionData) *bytes.Buffer {
 	buf := newBuf()
 

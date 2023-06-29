@@ -3,11 +3,12 @@ package cat
 import (
 	"bytes"
 	"encoding/xml"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/yeabow/cat-go/message"
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/xiaobudongzhang/cat-go/message"
 
 	"github.com/shirou/gopsutil/host"
 )
